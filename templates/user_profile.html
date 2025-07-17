@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Hồ sơ người dùng{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card mx-auto" style="max-width: 500px;">
+        <div class="card-body text-center">
+            <img src="{{ url_for('static', filename=user.avatar_url or 'default-avatar.png') }}"
+                class="rounded-circle mb-3" width="100" height="100">
+            <h4>Username: {{ user.username }}</h4>
+            <h4>Họ và tên: {{ user.full_name }}</h4>
+            <p class="text-muted">{{ user.email }}</p>
+
+            {% if status == "self" %}
+                <a href="{{ url_for('profile.view') }}" class="btn btn-outline-primary">✏️ Chỉnh sửa hồ sơ</a>
+
+            {% elif blocked_you %}
+                <p class="text-danger">❌ Bạn đã bị người này chặn</p>
+
+            {% elif blocked_by_you %}
+                <form action="{{ url_for('friend.unblock_user', user_id=user.id) }}" method="POST">
+                    <button class="btn btn-secondary">🔓 Bỏ chặn</button>
+                </form>
+
+            {% elif status == "accepted" %}
+                <p class="text-success">✅ Đã là bạn bè</p>
+
+                <!-- Nút mở modal xác nhận huỷ -->
+                <button type="button" class="btn btn-outline-danger me-2" data-bs-toggle="modal" data-bs-target="#confirmUnfriendModal">
+                    Hủy kết bạn
+                </button>
+
+                <!-- Modal xác nhận -->
+                <div class="modal fade" id="confirmUnfriendModal" tabindex="-1" aria-labelledby="confirmUnfriendModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="confirmUnfriendModalLabel">Xác nhận huỷ kết bạn</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        Bạn có chắc chắn muốn xoá bạn bè với <strong>{{ user.username }}</strong>?
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                        <form action="{{ url_for('friend.unfriend', user_id=user.id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-danger">Xoá bạn</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Nút chặn -->
+                <form action="{{ url_for('friend.block_user', user_id=user.id) }}" method="POST" class="d-inline">
+                    <button class="btn btn-danger">⛔ Chặn</button>
+                </form>
+
+            {% elif status == "pending" %}
+                <p class="text-warning">⌛ Đang chờ xác nhận</p>
+
+            {% else %}
+                <form action="{{ url_for('friend.add_friend') }}" method="POST" class="d-inline">
+                    <input type="hidden" name="username" value="{{ user.username }}">
+                    <button class="btn btn-success">➕ Gửi lời mời kết bạn</button>
+                </form>
+            {% endif %}
+        </div>
+        <a href="{{ url_for('home') }}" class="btn btn-secondary ms-2">Quay lại</a>
+    </div>
+</div>
+{% endblock %}

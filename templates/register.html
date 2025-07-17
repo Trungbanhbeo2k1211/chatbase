@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Đăng ký</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --success-color: #4cc9f0;
+            --error-color: #f72585;
+            --gray-light: #f8f9fa;
+            --gray-medium: #e9ecef;
+            --gray-dark: #adb5bd;
+            --text-color: #2b2d42;
+            --text-light: #8d99ae;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--gray-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 450px;
+            padding: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--gray-medium);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: var(--gray-light);
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            background-color: white;
+        }
+        
+        input::placeholder {
+            color: var(--gray-dark);
+        }
+        
+        .hint {
+            display: block;
+            margin-top: 0.4rem;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+        
+        .error {
+            color: var(--error-color);
+        }
+        
+        .success {
+            color: var(--success-color);
+        }
+        
+        button {
+            width: 100%;
+            padding: 0.9rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+        
+        button:hover {
+            background-color: #3a56d4;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-light);
+        }
+        
+        .footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .footer a:hover {
+            color: #3a56d4;
+            text-decoration: underline;
+        }
+        
+        .messages {
+            list-style: none;
+            margin: 1rem 0;
+        }
+        
+        .messages li {
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background-color: #feeafa;
+            color: var(--error-color);
+            font-size: 0.9rem;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .password-strength {
+            height: 4px;
+            background: var(--gray-medium);
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+            .card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>Đăng ký tài khoản</h2>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class="messages">
+                        {% for msg in messages %}
+                            <li>{{ msg }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" onsubmit="return validateForm()">
+                <div class="form-group">
+                    <input type="text" name="username" placeholder="Tên đăng nhập" required>
+                </div>
+                
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="Email" required>
+                </div>
+                
+                <div class="form-group">
+                    <input type="password" id="password" name="password" placeholder="Mật khẩu" required 
+                           oninput="checkPasswordStrength(); checkPasswordMatch();">
+                    <div class="password-strength">
+                        <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                    </div>
+                    <small id="passwordHelp" class="hint"></small>
+                </div>
+                
+                <div class="form-group">
+                    <input type="password" id="confirm_password" name="confirm_password" 
+                           placeholder="Nhập lại mật khẩu" required oninput="checkPasswordMatch()">
+                    <small id="confirmHelp" class="hint"></small>
+                </div>
+                
+                <button type="submit">Đăng ký</button>
+            </form>
+            
+            <p class="footer">Đã có tài khoản? <a href="{{ url_for('auth.login') }}">Đăng nhập</a></p>
+        </div>
+    </div>
+
+    <script>
+        function checkPasswordStrength() {
+            const pwd = document.getElementById("password").value;
+            const help = document.getElementById("passwordHelp");
+            const strengthBar = document.getElementById("passwordStrengthBar");
+            
+            const hasLength = pwd.length >= 8;
+            const hasUpper = /[A-Z]/.test(pwd);
+            const hasLower = /[a-z]/.test(pwd);
+            const hasNumber = /\d/.test(pwd);
+            const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pwd);
+            
+            let strength = 0;
+            let message = "";
+            
+            if (pwd.length === 0) {
+                strengthBar.style.width = "0%";
+                strengthBar.style.background = "";
+                help.textContent = "";
+                help.className = "hint";
+                return;
+            }
+            
+            if (hasLength) strength += 20;
+            if (hasUpper) strength += 20;
+            if (hasLower) strength += 20;
+            if (hasNumber) strength += 20;
+            if (hasSpecial) strength += 20;
+            
+            strengthBar.style.width = strength + "%";
+            
+            if (strength < 60) {
+                strengthBar.style.background = "#f72585";
+                message = "⚠️ Mật khẩu yếu";
+                help.className = "error";
+            } else if (strength < 80) {
+                strengthBar.style.background = "#f8961e";
+                message = "🔸 Mật khẩu trung bình";
+                help.className = "error";
+            } else {
+                strengthBar.style.background = "#4cc9f0";
+                message = "✅ Mật khẩu mạnh";
+                help.className = "success";
+            }
+            
+            if (!hasLength) message += " - Cần ít nhất 8 ký tự";
+            if (!hasUpper) message += " - Thiếu chữ hoa";
+            if (!hasLower) message += " - Thiếu chữ thường";
+            if (!hasNumber) message += " - Thiếu số";
+            if (!hasSpecial) message += " - Thiếu ký tự đặc biệt";
+            
+            help.textContent = message;
+        }
+
+        function checkPasswordMatch() {
+            const pwd = document.getElementById("password").value;
+            const confirmPwd = document.getElementById("confirm_password").value;
+            const confirmHelp = document.getElementById("confirmHelp");
+
+            if (!confirmPwd) {
+                confirmHelp.textContent = "";
+                confirmHelp.className = "hint";
+            } else if (pwd === confirmPwd) {
+                confirmHelp.textContent = "✅ Mật khẩu khớp!";
+                confirmHelp.className = "success";
+            } else {
+                confirmHelp.textContent = "⚠️ Mật khẩu không khớp!";
+                confirmHelp.className = "error";
+            }
+        }
+
+        function validateForm() {
+            const pwd = document.getElementById("password").value;
+            const confirmPwd = document.getElementById("confirm_password").value;
+            
+            if (pwd !== confirmPwd) {
+                document.getElementById("confirmHelp").textContent = "⚠️ Mật khẩu không khớp!";
+                document.getElementById("confirmHelp").className = "error";
+                return false;
+            }
+            
+            return true;
+        }
+    </script>
+</body>
+</html>

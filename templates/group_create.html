@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Tạo nhóm{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Tạo nhóm trò chuyện mới</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="group-name" class="form-label">Tên nhóm</label>
+            <input type="text" name="name" id="group-name" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Chọn bạn bè (chọn ít nhất 2):</label>
+            <div class="row">
+                {% for friend in friends %}
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="members" value="{{ friend.id }}"
+                            id="friend{{ friend.id }}">
+                        <label class="form-check-label" for="friend{{ friend.id }}">
+                            <img src="{{ url_for('static', filename=friend.avatar_url or 'default-avatar.png') }}"
+                                class="rounded-circle me-2" style="width: 30px; height: 30px;">
+                            {{ friend.username }}
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Tạo nhóm</button>
+        <a href="{{ url_for('chat.chat_page') }}" class="btn btn-secondary">Hủy</a>
+    </form>
+</div>
+{% endblock %}

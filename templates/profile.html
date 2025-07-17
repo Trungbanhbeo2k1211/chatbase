@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Hồ sơ cá nhân{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>👤 Hồ sơ cá nhân</h3>
+    <hr>
+
+<form method="POST" enctype="multipart/form-data" class="col-md-6">
+    <div class="mb-3 text-center">
+        <img src="{{ url_for('static', filename=(user.avatar_url or 'default-avatar.png')) }}"
+     alt="avatar" class="rounded-circle" width="100">
+
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Tên đầy đủ</label>
+        <input type="text" name="full_name" class="form-control" value="{{ user.full_name }}">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Ảnh đại diện</label>
+        <input type="file" name="avatar" class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+    <a href="{{ url_for('home') }}" class="btn btn-secondary ms-2">Quay lại</a>
+</form>
+<hr>
+<h5>⛔ Người bạn đã chặn</h5>
+<ul class="list-group">
+    {% for blocked in blocked_users %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+            <img src="{{ url_for('static', filename=blocked.avatar_url or 'default-avatar.png') }}" 
+                 class="rounded-circle me-2" width="32" height="32">
+            <strong>{{ blocked.username }}</strong>
+        </div>
+        <form action="{{ url_for('friend.unblock_user', user_id=blocked.id) }}" method="POST">
+            <button class="btn btn-sm btn-secondary">🔓 Bỏ chặn</button>
+        </form>
+    </li>
+    {% else %}
+    <li class="list-group-item text-muted">Bạn chưa chặn ai.</li>
+    {% endfor %}
+</ul>
+
+
+</div>
+{% endblock %}

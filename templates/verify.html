@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><title>Xác nhận tài khoản</title></head>
+<body>
+  <h2>Nhập mã xác nhận</h2>
+  <form method="POST">
+    <input type="email" name="email" value="{{ email }}" required>
+    <input type="text" name="token" placeholder="Mã xác nhận" required><br>
+    <button type="submit">Xác nhận</button>
+  </form>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul>{% for msg in messages %}<li>{{ msg }}</li>{% endfor %}</ul>
+    {% endif %}
+  {% endwith %}
+</body>
+</html>

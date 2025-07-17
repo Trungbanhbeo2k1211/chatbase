@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatBase - Dashboard</title>
+    <style>
+        /* Reset CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Layout chính */
+        body {
+            display: flex;
+            height: 100vh;
+            background: #f5f5f5;
+        }
+
+        /* Sidebar trái (Menu chính) */
+        .sidebar {
+            width: 80px;
+            background: #075e54;
+            color: white;
+            padding: 15px 0;
+            transition: width 0.3s;
+            overflow: hidden;
+        }
+
+        .sidebar:hover {
+            width: 250px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .sidebar-item:hover {
+            background: #128c7e;
+        }
+
+        .sidebar-item i {
+            margin-right: 15px;
+            font-size: 20px;
+        }
+
+        /* Phần content chính */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Topbar */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #128c7e;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        /* Dashboard Content */
+        .dashboard {
+            display: flex;
+            flex: 1;
+        }
+
+        /* Chat List (Bên trái) */
+        .chat-list-container {
+            width: 350px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+        }
+
+        .chat-list-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chat-search {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .chat-search input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .chat-item {
+            display: flex;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .chat-item:hover {
+            background: #f9f9f9;
+        }
+
+        .chat-item.active {
+            background: #e3f2fd;
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #128c7e;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: bold;
+        }
+
+        .chat-info {
+            flex: 1;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .chat-preview {
+            font-size: 13px;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Chat Area (Bên phải) */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #e5ddd5;
+            background-image: url('https://web.whatsapp.com/img/bg-chat-tile-light_a4be512e.png');
+        }
+
+        .chat-header {
+            padding: 15px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-title {
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .message.sent {
+            background: #dcf8c6;
+            margin-left: auto;
+            border-top-right-radius: 0;
+        }
+
+        .message.received {
+            background: #fff;
+            margin-right: auto;
+            border-top-left-radius: 0;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #666;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .input-area {
+            padding: 15px;
+            background: white;
+            display: flex;
+            align-items: center;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .input-area button {
+            margin-left: 10px;
+            padding: 10px 15px;
+            background: #075e54;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                position: fixed;
+                z-index: 100;
+                height: 100%;
+            }
+            .sidebar:hover {
+                width: 250px;
+            }
+            .chat-list-container {
+                width: 100%;
+            }
+            .chat-area {
+                display: none;
+            }
+            .chat-area.active {
+                display: flex;
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                z-index: 90;
+            }
+        }
+    </style>
+    <!-- Font Awesome cho icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar Menu -->
+    <div class="sidebar">
+        <div class="sidebar-item">
+            <i class="fas fa-comment-dots"></i>
+            <span>Trò chuyện</span>
+        </div>
+        <div class="sidebar-item">
+            <i class="fas fa-users"></i>
+            <span>Nhóm</span>
+        </div>
+        <div class="sidebar-item">
+            <i class="fas fa-address-book"></i>
+            <span>Danh bạ</span>
+        </div>
+        <div class="sidebar-item">
+            <i class="fas fa-cog"></i>
+            <span>Cài đặt</span>
+        </div>
+        <div class="sidebar-item">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Đăng xuất</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Topbar -->
+        <div class="topbar">
+            <div>
+                <h3>ChatBase</h3>
+            </div>
+            <div class="user-profile">
+                <div class="user-avatar">NV</div>
+                <span>Nguyễn Văn</span>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard">
+            <!-- Danh sách chat -->
+            <div class="chat-list-container">
+                <div class="chat-list-header">
+                    <span>Tin nhắn</span>
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div class="chat-search">
+                    <input type="text" placeholder="Tìm kiếm...">
+                </div>
+                <div class="chat-list">
+                    <div class="chat-item active">
+                        <div class="chat-avatar">DT</div>
+                        <div class="chat-info">
+                            <div class="chat-name">Nhóm Dev Team</div>
+                            <div class="chat-preview">Bạn: Tôi sẽ gửi bản thiết kế...</div>
+                        </div>
+                    </div>
+                    <div class="chat-item">
+                        <div class="chat-avatar">HA</div>
+                        <div class="chat-info">
+                            <div class="chat-name">Hoàng Anh</div>
+                            <div class="chat-preview">Xin chào, bạn khỏe không?</div>
+                        </div>
+                    </div>
+                    <div class="chat-item">
+                        <div class="chat-avatar">CS</div>
+                        <div class="chat-info">
+                            <div class="chat-name">Hỗ trợ khách hàng</div>
+                            <div class="chat-preview">Cảm ơn bạn đã phản hồi!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="chat-area">
+                <div class="chat-header">
+                    <div class="chat-avatar">DT</div>
+                    <div class="chat-title">Nhóm Dev Team (5 thành viên)</div>
+                </div>
+                <div class="messages">
+                    <div class="message received">
+                        Chào team, ai có ý tưởng cho layout chat chưa?
+                        <div class="message-time">10:30 AM</div>
+                    </div>
+                    <div class="message sent">
+                        Tôi đang làm một bản demo, sẽ gửi mọi người sau 1 tiếng.
+                        <div class="message-time">10:32 AM</div>
+                    </div>
+                </div>
+                <div class="input-area">
+                    <input type="text" placeholder="Nhập tin nhắn...">
+                    <button><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Xử lý click vào chat item
+        document.querySelectorAll('.chat-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Trên mobile: Ẩn danh sách chat, hiện chat area
+                if (window.innerWidth <= 768) {
+                    document.querySelector('.chat-area').classList.add('active');
+                }
+            });
+        });
+
+        // Xử lý gửi tin nhắn
+        const input = document.querySelector('.input-area input');
+        const sendBtn = document.querySelector('.input-area button');
+
+        sendBtn.addEventListener('click', sendMessage);
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        function sendMessage() {
+            const text = input.value.trim();
+            if (text) {
+                const messagesDiv = document.querySelector('.messages');
+                messagesDiv.innerHTML += `
+                    <div class="message sent">
+                        ${text}
+                        <div class="message-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    </div>
+                `;
+                input.value = '';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }
+
+        // Back button cho mobile
+        document.querySelector('.chat-header').addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                document.querySelector('.chat-area').classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

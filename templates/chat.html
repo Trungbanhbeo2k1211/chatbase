@@ -1,0 +1,1420 @@
+{% extends "base.html" %}
+
+{% block title %}Trò chuyện{% endblock %}
+
+{% block content %}
+<style>
+/* General Styles */
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.container-fluid.h-100 {
+    padding: 0;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid #e1e4e8;
+    padding: 15px;
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar h6 {
+    color: #495057;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #e1e4e8;
+}
+
+/* Contact Items */
+.contact-item {
+    cursor: pointer;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.contact-item:hover {
+    background-color: #f1f3f5;
+}
+
+.contact-item.active {
+    background-color: #e3f2fd;
+    font-weight: 500;
+}
+
+.contact-item .badge {
+    font-size: 0.6rem;
+    padding: 3px 6px;
+}
+
+/* Avatar Styles */
+.avatar {
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+}
+
+/* Chat Area Styles */
+.chat-area {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #f0f2f5;
+    padding: 0;
+}
+
+.chat-header {
+    padding: 15px 20px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e1e4e8;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
+
+.chat-header h5 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #212529;
+}
+
+/* Messages Container */
+.messages-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-image: url('../images/chat-bg-pattern.png');
+    background-color: #e5ddd5;
+    background-blend-mode: overlay;
+}
+
+#chat-placeholder {
+    text-align: center;
+    color: #6c757d;
+    padding: 20px;
+}
+
+#chat-placeholder img {
+    opacity: 0.7;
+}
+
+/* Message Styles */
+.message {
+    margin-bottom: 15px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message-header {
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.message-header small {
+    font-size: 0.75rem;
+}
+
+.message-content {
+    display: inline-block;
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 70%;
+    word-wrap: break-word;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+}
+
+.message.you .message-content {
+    background-color: #007bff;
+    color: white;
+    border-bottom-right-radius: 3px;
+}
+
+.message.other .message-content {
+    background-color: #ffffff;
+    color: #212529;
+    border-bottom-left-radius: 3px;
+}
+
+/* Image and Video Content */
+.image-content img, .video-content video {
+    max-width: 300px;
+    max-height: 300px;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Chat Input */
+.chat-input {
+    background-color: #ffffff;
+    border-top: 1px solid #e1e4e8;
+    padding: 15px;
+    position: relative;
+}
+
+#emoji-picker-container {
+    right: 20px;
+    bottom: 70px;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Online Status Dot */
+.online-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Friend Requests */
+.friend-requests-dropdown {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Video Call Styles */
+#video-call-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+#video-call-container video {
+    margin: 10px;
+    background: #000;
+    border-radius: 8px;
+}
+
+#end-call-btn {
+    z-index: 1001;
+}
+
+/* Seen Status */
+.seen-status {
+    font-size: 0.7rem;
+    color: #6c757d;
+}
+
+/* Typing Indicator */
+#typing-indicator {
+    font-size: 0.85rem;
+    font-style: italic;
+    color: #6c757d;
+    height: 20px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        z-index: 100;
+        height: 100%;
+        width: 80%;
+        left: -100%;
+        transition: left 0.3s ease;
+    }
+    
+    .sidebar.show {
+        left: 0;
+    }
+    
+    .chat-area {
+        margin-left: 0;
+    }
+    
+    .message-content {
+        max-width: 85%;
+    }
+}
+
+/* Animation for new messages */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+.new-message {
+    animation: pulse 0.5s ease;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* KHÔNG ĐƯỢC XÓA */
+    .chat-header {
+        padding: 0.75rem 1.5rem;
+        background: #ffffff;
+        border-bottom: 1px solid #e9ecef;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .chat-header h5 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        white-space: nowrap;
+    }
+
+    #chat-with {
+        color: #4361ee;
+        font-weight: 500;
+        margin-right: 0.5rem;
+    }
+
+    /* Typing Indicator - Inline Style */
+    #typing-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: #6c757d;
+        font-size: 0.85rem;
+        animation: typing-pulse 1.5s infinite;
+    }
+
+    @keyframes typing-pulse {
+
+        0%,
+        100% {
+            opacity: 0.6;
+        }
+
+        50% {
+            opacity: 1;
+        }
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .chat-header {
+            padding: 0.75rem 1rem;
+        }
+
+        .chat-header h5 {
+            font-size: 1rem;
+        }
+
+        #typing-indicator {
+            font-size: 0.8rem;
+        }
+    }
+
+    /* EMOJII */
+    .emoji-only {
+        font-size: 2rem;
+        line-height: 2.5rem;
+        text-align: center;
+        white-space: pre-wrap;
+    }
+</style>
+
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        <!-- Sidebar -->
+        <div class="col-md-3 sidebar">
+            <div class="mb-4 p-2 border rounded bg-light">
+                <div class="d-flex align-items-center">
+                    <img src="{{ url_for('static', filename=(current_user.avatar_url or 'default-avatar.png')) }}"
+                        alt="avatar" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+                    <div>
+                        <strong>{{ current_user.username }}</strong><br>
+                        <small>{{ current_user.email }}</small>
+                    </div>
+                </div>
+                <a href="{{ url_for('profile.view') }}" class="btn btn-sm btn-outline-secondary mt-2">Chỉnh sửa hồ
+                    sơ</a>
+            </div>
+
+            <!-- Nút toggle 🔔 -->
+            <div class="text-end mb-2">
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#friendRequestsCollapse" aria-expanded="false"
+                    aria-controls="friendRequestsCollapse">
+                    🔔 Lời mời kết bạn
+                    {% if friend_requests|length > 0 %}
+                    <span class="badge bg-danger">{{ friend_requests|length }}</span>
+                    {% endif %}
+                </button>
+
+            </div>
+
+            <!-- Khung danh sách (ẩn mặc định + có hiệu ứng mở/đóng) -->
+            <div class="collapse" id="friendRequestsCollapse">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">🔔 Lời mời kết bạn</h6>
+                        {% if friend_requests|length > 0 %}
+                        <span class="badge bg-danger">{{ friend_requests|length }}</span>
+                        {% endif %}
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% for request in friend_requests %}
+                        <li class="list-group-item d-flex align-items-center justify-content-between">
+                            <a href="{{ url_for('profile.view_profile', user_id=request.id) }}"
+                                class="d-flex align-items-center text-decoration-none text-dark">
+                                <img src="{{ url_for('static', filename=request.avatar_url or 'default-avatar.png') }}"
+                                    alt="avatar" class="rounded-circle me-2" width="40" height="40">
+                                <div>
+                                    <strong>{{ request.username }}</strong><br>
+                                    <small class="text-muted">{{ request.full_name }}</small>
+                                </div>
+                            </a>
+                            <div class="ms-auto d-flex gap-1">
+                                <form action="{{ url_for('friend.accept_friend', user_id=request.id) }}" method="POST">
+                                    <button class="btn btn-sm btn-success">✔</button>
+                                </form>
+                                <form action="{{ url_for('friend.reject_friend', user_id=request.id) }}" method="POST">
+                                    <button class="btn btn-sm btn-danger">✖</button>
+                                </form>
+                            </div>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item text-center text-muted">Không có lời mời nào</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+
+
+            <!-- ➕ Kết bạn -->
+            <h6>➕ Thêm bạn bè</h6>
+            <form action="{{ url_for('friend.add_friend') }}" method="POST" class="mb-3 d-flex">
+                <input name="username" class="form-control me-2" placeholder="Tên người dùng" required>
+                <button class="btn btn-success">Gửi</button>
+            </form>
+
+            <!-- 👥 Bạn bè -->
+            <h6>👥 Bạn bè</h6>
+            <ul id="friend-list" class="list-group mb-4">
+                {% for friend in friends %}
+                <li class="list-group-item contact-item d-flex align-items-center position-relative" data-type="user"
+                    data-id="{{ friend.id }}" data-user-id="{{ friend.id }}">
+                    <a href="{{ url_for('profile.view_profile', user_id=friend.id) }}"
+                        class="d-flex align-items-center text-decoration-none text-dark">
+                        <img src="{{ url_for('static', filename=(friend.avatar_url or 'default-avatar.png')) }}"
+                            alt="avatar" class="rounded-circle me-2" style="width: 30px; height: 30px;">
+                        {{ friend.username }}
+                    </a>
+
+                    <!-- 🔔 Badge thông báo -->
+                    <span
+                        class="badge rounded-pill bg-danger text-white position-absolute top-0 end-0 translate-middle {{ 'd-none' if friend.unread_count == 0 else '' }}"
+                        id="badge-{{ friend.id }}">
+                        {{ friend.unread_count }}
+                    </span>
+
+                    <!-- 🟢 Chấm online -->
+                    <span
+                        class="online-dot position-absolute top-50 end-0 translate-middle-y border border-white rounded-circle d-none"
+                        style="width: 8.5px; height: 8.5px; background-color: #28a745;"
+                        data-online-indicator="{{ friend.id }}">
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+
+
+
+            <!-- 🏘️ Nhóm -->
+            <h6>🏘️ Nhóm</h6>
+            <a href="{{ url_for('group.create_group') }}" class="btn btn-sm btn-success mb-2">➕ Tạo nhóm</a>
+            <ul id="group-list" class="list-group">
+                {% for group in groups %}
+                <li class="list-group-item contact-item d-flex justify-content-between align-items-center"
+                    data-type="group" data-id="{{ group.id }}">
+                    <span>{{ group.name }}</span>
+                    <span class="badge bg-danger rounded-pill {% if group.unread_count == 0 %}d-none{% endif %}"
+                        id="badge-group-{{ group.id }}">
+                        {{ group.unread_count }}
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+
+
+
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-danger mt-4">Đăng xuất</a>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="col-md-9 chat-area">
+            <div class="chat-header">
+                <h5> 💬 Đang trò chuyện với: <span id="chat-with">Hãy chọn người để nói chuyện</span></h5>
+                <div id="typing-indicator" class="text-muted small" style="display: none;">✍️ Đang gõ...</div>
+                <div id="typing-indicator" class="text-muted small mt-1" style="display: none;"></div>
+                <button id="start-call-btn" class="btn btn-sm btn-outline-primary d-none">📞 Gọi video</button>
+            </div>
+
+
+
+            <div id="chat-box" class="messages-container">
+
+
+
+                <!-- TEST -->
+                <div id="chat-placeholder"
+                    class="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
+                    <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="Start chatting"
+                        style="max-width: 250px;" class="mb-3">
+                    <h5>Chưa có cuộc trò chuyện nào</h5>
+                    <p>Chọn một người bạn hoặc nhóm bên trái để bắt đầu nhé 😊</p>
+                </div>
+
+
+                <!-- Tin nhắn sẽ được chèn tại đây -->
+            </div>
+
+
+
+<!-- Popup xác nhận cuộc gọi -->
+<div id="incoming-call-popup" class="modal" tabindex="-1" style="display:none;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <h5 id="caller-name">Đang có cuộc gọi đến...</h5>
+        <button id="accept-call-btn" class="btn btn-success me-2">Chấp nhận</button>
+        <button id="reject-call-btn" class="btn btn-danger">Từ chối</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Video Call UI -->
+<div id="video-call-container" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-none">
+  <video id="local-video" autoplay muted class="w-50 h-50 border"></video>
+  <video id="remote-video" autoplay class="w-50 h-50 border"></video>
+  <button id="end-call-btn" class="btn btn-danger position-absolute bottom-0 start-50 translate-middle-x mb-3">
+    Kết thúc cuộc gọi
+  </button>
+</div>
+
+
+            <div class="chat-input d-none" id="chat-input">
+                <form id="chat-form" class="d-flex p-3 border-top" enctype="multipart/form-data">
+
+                    <input id="message-input" class="form-control me-2" placeholder="Nhập tin nhắn..."
+                        autocomplete="off" />
+
+                    <button id="emoji-btn" type="button" class="btn btn-outline-secondary me-2">😊</button>
+
+                    <input type="file" id="file-input" multiple class="form-control me-2" />
+                    <button type="submit" class="btn btn-primary">Gửi</button>
+
+                </form>
+                <div id="emoji-picker-container" style="position: absolute; bottom: 60px; z-index: 1000;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<audio id="call-audio" src="{{ url_for('static', filename='sounds/iphone.mp3') }}" preload="auto"></audio>
+<audio id="message-audio" src="{{ url_for('static', filename='sounds/arpeggio-467.mp3') }}"></audio>
+<script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+<script>
+    const socket = io();
+    let currentTarget = null;
+    let currentType = null;
+    const onlineUserIds = new Set();
+
+    let hasUserInteracted = false;
+    document.addEventListener("click", () => {
+        hasUserInteracted = true;
+    });
+
+
+    socket.on("connect", () => {
+        const groupIds = {{ group_ids | tojson }};
+        groupIds.forEach(groupId => {
+            socket.emit("join_room", { room: "group_" + groupId });
+        });
+
+        const currentUserId = {{ current_user.id }};
+        socket.emit("join_room", { room: "user_" + currentUserId });
+    });
+
+
+let localStream = null;  // Gán lại khi gọi startVideo()
+
+function stopVideoStream() {
+    if (localStream) {
+        localStream.getTracks().forEach(track => {
+            track.stop();  // Tắt từng luồng (camera, mic)
+        });
+        localStream = null;
+    }
+
+    const videoElement = document.getElementById("local-video");
+    if (videoElement) {
+        videoElement.srcObject = null;
+    }
+}
+
+
+
+let peer;
+const videoPopup = document.getElementById("incoming-call-popup");
+const localVideo = document.getElementById("local-video");
+const remoteVideo = document.getElementById("remote-video");
+const videoContainer = document.getElementById("video-call-container");
+
+document.getElementById("start-call-btn").addEventListener("click", () => {
+    if (!currentTarget || currentType !== "user") return;
+    socket.emit("start_call", { to_id: currentTarget });
+});
+
+// Khi nhận yêu cầu gọi
+socket.on("incoming_call", (data) => {
+    videoPopup.style.display = "block";
+    document.getElementById("caller-name").textContent = `${data.username} đang gọi bạn...`;
+
+    // 🔔 Phát âm thanh chuông gọi
+    const audio = document.getElementById("call-audio");
+    if (audio && hasUserInteracted) {
+        try {
+            audio.currentTime = 0;
+            audio.loop = true;
+            audio.play().catch(err => {
+                console.warn("Không thể phát âm thanh:", err);
+            });
+        } catch (err) {
+            console.error("Lỗi khi phát âm thanh:", err);
+        }
+    }
+
+    // ✅ Nút chấp nhận
+    document.getElementById("accept-call-btn").onclick = () => {
+        videoPopup.style.display = "none";
+        socket.emit("accept_call", { from_id: data.from_id });
+        if (audio) audio.pause();  // ⏹ Dừng chuông
+        startVideo(true);
+    };
+
+    // ❌ Nút từ chối
+    document.getElementById("reject-call-btn").onclick = () => {
+        videoPopup.style.display = "none";
+        socket.emit("reject_call", { from_id: data.from_id });
+        if (audio) audio.pause();  // ⏹ Dừng chuông
+    };
+});
+
+
+
+
+
+// Người B được chấp nhận
+socket.on("call_accepted", () => {
+    startVideo(false);  // Người gọi bắt đầu video
+});
+
+// Người B từ chối
+socket.on("call_rejected", () => {
+    alert("Người kia đã từ chối cuộc gọi.");
+});
+
+
+
+// Bắt đầu video call
+
+function startVideo(isReceiver) {
+    videoContainer.classList.remove("d-none");
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then((stream) => {
+            localStream = stream;
+            localVideo.srcObject = stream;
+
+            peer = new SimplePeer({
+                initiator: !isReceiver,
+                trickle: false,
+                stream: stream
+            });
+
+            peer.on("signal", (data) => {
+                socket.emit("webrtc_signal", { to_id: currentTarget, signal: data });
+            });
+
+            peer.on("stream", (remoteStream) => {
+                remoteVideo.srcObject = remoteStream;
+            });
+
+            // Xử lý kết thúc cuộc gọi từ người này
+            document.getElementById("end-call-btn").onclick = () => {
+                endCall(); // sử dụng hàm tách riêng
+                socket.emit("end_call", { to_id: currentTarget });
+            };
+        });
+}
+
+// Chỉ nên gắn 1 lần sau khi kết nối socket
+socket.on("webrtc_signal", (data) => {
+    if (peer) peer.signal(data.signal);
+});
+
+// Nhận kết thúc cuộc gọi từ người kia
+socket.on("end_call", () => {
+    console.log("Cuộc gọi đã kết thúc từ phía bên kia.");
+    endCall();
+});
+
+// Hàm dọn dẹp call
+function endCall() {
+    if (peer) {
+        peer.destroy();
+        peer = null;
+    }
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+    }
+    stopVideoStream();
+    videoContainer.classList.add("d-none");
+    localVideo.srcObject = null;
+    remoteVideo.srcObject = null;
+}
+
+
+
+
+// Kết thúc Video
+socket.on("call_ended", () => {
+    console.log("Người kia đã kết thúc cuộc gọi");
+
+    // Hủy kết nối peer
+    if (peer) {
+        peer.destroy();
+        peer = null;
+    }
+
+    // Tắt video stream nếu đang chạy
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+    }
+
+    // Ẩn video call UI
+    videoContainer.classList.add("d-none");
+
+    // Clear video src nếu cần
+    const remoteVideo = document.getElementById("remote-video");
+    const localVideo = document.getElementById("local-video");
+    if (remoteVideo) remoteVideo.srcObject = null;
+    if (localVideo) localVideo.srcObject = null;
+});
+
+
+    
+    document.querySelectorAll(".contact-item").forEach(item => {
+        item.addEventListener("click", function () {
+            // Xóa active từ tất cả các item
+            document.querySelectorAll(".contact-item").forEach(i => i.classList.remove("active"));
+            // Thêm active cho item được click
+            this.classList.add("active");
+
+            currentTarget = this.dataset.id;
+            currentType = this.dataset.type;
+
+            document.getElementById("chat-with").textContent = this.textContent.trim();
+            document.getElementById("message-input").disabled = false;
+            document.querySelector("#chat-form button").disabled = false;
+
+            if (currentType === "group") {
+                socket.emit("join_room", { room: "group_" + currentTarget });
+                socket.emit("load_group_history", { group_id: currentTarget });
+
+                socket.emit("mark_group_as_read", { group_id: currentTarget });
+                const badge = document.getElementById("badge-group-" + currentTarget);
+                if (badge) {
+                    badge.classList.add("d-none");
+                    badge.textContent = "0";
+                }
+            } else {
+                socket.emit("load_private_history", { target_id: currentTarget });
+            }
+            // ✅ Hiện/ẩn nút gọi video
+            if (currentType === "user") {
+                document.getElementById("start-call-btn").classList.remove("d-none");
+            } else {
+                document.getElementById("start-call-btn").classList.add("d-none");
+            }
+            document.getElementById("chat-input").classList.remove("d-none");
+            document.getElementById("chat-box").innerHTML = "";
+
+        });
+    });
+
+
+    let typingTimeout;
+
+    document.getElementById("message-input").addEventListener("input", function () {
+        if (!currentTarget) return;
+
+        if (currentType === "user") {
+            socket.emit("typing", { to_id: currentTarget });
+
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                socket.emit("stop_typing", { to_id: currentTarget });
+            }, 1000); // Sau 1 giây không gõ thì dừng
+        }
+
+        if (currentType === "group") {
+            socket.emit("typing_group", { group_id: currentTarget });
+
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                socket.emit("stop_typing_group", { group_id: currentTarget });
+            }, 1000);
+        }
+    });
+
+
+
+
+    function scrollToBottomSmooth() {
+        const box = document.getElementById("chat-box");
+        setTimeout(() => {
+            box.scrollTop = box.scrollHeight;
+        }, 300); // Tăng delay nếu có ảnh/video nhiều
+    }
+
+
+
+    // Xử lý nhận lịch sử tin nhắn
+    socket.on("load_history", (data) => {
+        const box = document.getElementById("chat-box");
+        box.innerHTML = "";
+
+        const messages = data.messages || [];
+        const myUsername = "{{ session['username'] }}";
+
+        messages.forEach((msg) => {
+            const isMe = msg.username === myUsername;
+            const div = document.createElement("div");
+            div.classList.add("message", isMe ? "you" : "other");
+
+            const avatarUrl = "{{ url_for('static', filename='') }}" + (msg.avatar_url || 'default-avatar.png');
+
+            let contentHtml = "";
+
+            if (msg.message) {
+                contentHtml += `
+            <div class="message-content ${isMe ? 'bg-primary text-white' : 'bg-light text-dark'}">
+                ${msg.message.replace(/\n/g, '<br>')}
+            </div>
+        `;
+            }
+
+            // Hỗ trợ ảnh cũ (nếu server vẫn dùng image_url)
+            if (msg.image_url) {
+                contentHtml += `
+            <div class="image-content mt-2">
+                <img src="${msg.image_url}" class="img-fluid rounded">
+            </div>
+        `;
+            }
+
+            // Hỗ trợ danh sách attachments (mới)
+            if (Array.isArray(msg.attachments)) {
+                msg.attachments.forEach(att => {
+                    if (att.type === "image") {
+                        contentHtml += `
+                        <div class="image-content mt-2">
+                            <img src="${att.url}" class="img-fluid rounded">
+                        </div>
+                    `;
+                    } else if (att.type === "video") {
+                        contentHtml += `
+                        <div class="video-content mt-2">
+                            <video controls class="w-100 rounded">
+                                <source src="${att.url}" type="video/mp4">
+                                Trình duyệt của bạn không hỗ trợ video.
+                            </video>
+                        </div>
+                    `;
+                    } else if (att.type === "file") {
+                        contentHtml += `
+                        <div class="file-content mt-2">
+                            <a href="${att.url}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                📎 ${att.name}
+                            </a>
+                        </div>
+                    `;
+                    }
+                });
+            }
+
+
+            div.innerHTML = `
+                <div class="d-flex ${isMe ? 'justify-content-end' : ''}" style="align-items: flex-start;">
+                    ${!isMe ? `<img src="${avatarUrl}" class="avatar rounded-circle me-2">` : ""}
+                    <div class="message-container" style="${isMe ? 'margin-left: auto;' : 'margin-right: auto;'}">
+                        <div class="message-header">
+                            ${!isMe ? `<strong>${msg.username}</strong>` : ""}
+                            <small class="text-muted ms-2">${msg.timestamp}</small>
+                        </div>
+                        ${contentHtml}
+                    </div>
+                    ${isMe ? `<img src="${avatarUrl}" class="avatar rounded-circle ms-2">` : ""}
+                </div>
+            `;
+
+            box.appendChild(div);
+        });
+
+
+        // Nếu có tin nhắn cuối cùng là của mình và đã được xem
+        if (data.last_seen) {
+            const messages = box.querySelectorAll(".message.you");
+            if (messages.length > 0) {
+                const lastMsg = messages[messages.length - 1];
+
+                if (!lastMsg.querySelector(".seen-status")) {
+                    const seenTag = document.createElement("div");
+                    seenTag.className = "seen-status text-end text-muted small mt-1";
+                    seenTag.innerText = "Đã xem";
+                    seenTag.style.display = "none";
+
+                    lastMsg.appendChild(seenTag);
+
+                    // Hiện/ẩn khi click
+                    lastMsg.addEventListener("click", () => {
+                        seenTag.style.display = seenTag.style.display === "none" ? "block" : "none";
+                    });
+                }
+            }
+        }
+
+        scrollToBottomSmooth();
+
+        // Gửi event đánh dấu đã đọc
+        socket.emit("mark_as_read", { from_id: currentTarget });
+    });
+
+
+
+
+
+
+    // Load tin nhắn Group
+    socket.on("load_group_history", (data) => {
+        const box = document.getElementById("chat-box");
+        box.innerHTML = "";
+
+        const messages = data.messages || [];
+        const myUsername = "{{ session['username'] }}";
+
+        messages.forEach((msg) => {
+            const isMe = msg.username === myUsername;
+            const div = document.createElement("div");
+            div.classList.add("message", isMe ? "you" : "other");
+
+            const avatarUrl = "{{ url_for('static', filename='') }}" + (msg.avatar_url || 'default-avatar.png');
+
+            let contentHtml = "";
+
+            if (msg.message) {
+                contentHtml += `
+                <div class="message-content ${isMe ? 'bg-primary text-white' : 'bg-light text-dark'}">
+                    ${msg.message.replace(/\n/g, '<br>')}
+                </div>
+            `;
+            }
+
+            if (Array.isArray(msg.attachments)) {
+                msg.attachments.forEach(att => {
+                    if (att.file_type === "image") {
+                        contentHtml += `<img src="${att.file_url}" class="img-fluid rounded mt-2">`;
+                    } else if (att.file_type === "video") {
+                        contentHtml += `
+                        <div class="video-content mt-2">
+                            <video controls class="w-100 rounded">
+                                <source src="${att.file_url}" type="video/mp4">
+                                Trình duyệt không hỗ trợ video.
+                            </video>
+                        </div>
+                    `;
+                    } else {
+                        contentHtml += `
+                        <a href="${att.file_url}" target="_blank" class="btn btn-sm btn-outline-secondary mt-2">
+                            📎 ${att.filename}
+                        </a>
+                    `;
+                    }
+                });
+            }
+
+            div.innerHTML = `
+            <div class="d-flex ${isMe ? 'justify-content-end' : ''}">
+                ${!isMe ? `<img src="${avatarUrl}" class="avatar rounded-circle me-2">` : ""}
+                <div class="message-container text-${isMe ? 'end' : 'start'}">
+                    <div class="message-header">
+                        ${!isMe ? `<strong>${msg.username}</strong>` : ""}
+                        <small class="text-muted ms-2">${msg.timestamp}</small>
+                    </div>
+                    ${contentHtml}
+                </div>
+                ${isMe ? `<img src="${avatarUrl}" class="avatar rounded-circle ms-2">` : ""}
+            </div>
+        `;
+
+            box.appendChild(div);
+        });
+
+        scrollToBottomSmooth();
+    });
+
+
+
+
+
+
+    // Xử lý gửi tin nhắn (Cho cả Group và riêng)
+    document.getElementById("chat-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const input = document.getElementById("message-input");
+        const fileInput = document.getElementById("file-input");
+        const message = input.value.trim();
+        const files = fileInput.files;
+
+        if (!currentTarget) return;
+
+        const hasFile = files.length > 0;
+        const hasMessage = message !== "";
+
+        if (!hasFile && !hasMessage) return;
+
+        // === Nếu có file (ảnh, video, tài liệu) thì dùng fetch gửi tới server ===
+        if (hasFile) {
+            const formData = new FormData();
+
+            if (currentType === "group") {
+                formData.append("group_id", currentTarget);
+            } else {
+                formData.append("to_id", currentTarget);
+                formData.append("type", currentType);
+            }
+
+            if (hasMessage) {
+                formData.append("message", message);
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                formData.append("files", files[i]);
+            }
+
+            try {
+                const res = await fetch(
+                    currentType === "group" ? "/send-group-message" : "/send-message",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+                if (!res.ok) {
+                    console.error("Gửi tin nhắn thất bại");
+                } else {
+                    console.log("Tin nhắn đã gửi thành công");
+                }
+            } catch (error) {
+                console.error("Lỗi khi gửi:", error);
+            }
+        }
+
+        // === Nếu chỉ là tin nhắn text thì gửi qua WebSocket ===
+        if (!hasFile && hasMessage) {
+            if (currentType === "group") {
+                socket.emit("send_message", {
+                    room: "group_" + currentTarget,
+                    message: message,
+                    username: "{{ session['username'] }}",
+                    avatar_url: "{{ current_user.avatar_url or '' }}"
+                });
+            } else {
+                socket.emit("send_message_private", {
+                    to_id: currentTarget,
+                    message: message,
+                    username: "{{ session['username'] }}",
+                    avatar_url: "{{ current_user.avatar_url or '' }}"
+                });
+            }
+        }
+
+        // Xóa input sau khi gửi
+        input.value = "";
+        fileInput.value = "";
+    });
+
+
+
+
+
+
+
+    // Xử lý nhận tin nhắn mới
+    socket.on("receive_message", (data) => {
+        console.log("receive_message", data);
+
+        const myId = parseInt("{{ session['user_id'] }}");
+        const senderId = parseInt(data.from_id);
+        const receiverId = parseInt(data.to_id);
+        const targetId = parseInt(currentTarget || -1); // fallback nếu chưa có target
+
+        const isMe = senderId === myId;
+
+        // Nếu là tin nhắn gửi cho mình và KHÔNG phải đang mở đoạn chat với người gửi
+        if (!isMe && senderId !== targetId) {
+            // Hiện badge thông báo ở sidebar
+            const badge = document.getElementById("badge-" + senderId);
+            if (badge) {
+                let count = parseInt(badge.textContent) || 0;
+                badge.textContent = count + 1;
+                badge.classList.remove("d-none");
+            }
+            const audio = document.getElementById("message-audio");
+            if (audio && !document.hasFocus()) {
+                audio.play().catch(err => {
+                    console.warn("Không thể phát âm thanh:", err);
+                });
+            }
+            // Không hiển thị vào khung chat nếu không phải đoạn đang mở
+            return;
+        }
+
+        // Nếu đang mở đúng đoạn chat thì hiển thị bình thường
+        const box = document.getElementById("chat-box");
+        const div = document.createElement("div");
+        div.classList.add("message", isMe ? "you" : "other");
+
+        const avatarUrl = "{{ url_for('static', filename='') }}" + (data.avatar_url || 'default-avatar.png');
+
+        let attachmentsHTML = "";
+        if (Array.isArray(data.attachments)) {
+            data.attachments.forEach(att => {
+                if (att.file_type === "image") {
+                    attachmentsHTML += `<img src="${att.file_url}" class="img-fluid rounded mt-2">`;
+                } else if (att.file_type === "video") {
+                    attachmentsHTML += `
+                    <div class="video-content mt-2">
+                        <video controls class="w-100 rounded">
+                            <source src="${att.file_url}" type="video/mp4">
+                            Trình duyệt không hỗ trợ phát video.
+                        </video>
+                    </div>`;
+                } else {
+                    attachmentsHTML += `
+                    <a href="${att.file_url}" target="_blank" class="btn btn-sm btn-outline-secondary mt-2">
+                        📎 ${att.filename}
+                    </a>`;
+                }
+            });
+        }
+
+        let msgHtml = `
+        <div class="d-flex ${isMe ? 'justify-content-end' : 'align-items-start'}">
+            ${!isMe ? `<img src="${avatarUrl}" class="avatar rounded-circle me-2">` : ""}
+            <div class="message-container text-${isMe ? 'end' : 'start'}">
+                <div class="message-header">
+                    ${!isMe ? `<strong>${data.username}</strong>` : ""}
+                    <small class="text-muted ms-2">${data.timestamp}</small>
+                </div>
+                <div class="message-content bg-${isMe ? 'primary' : 'light'} text-${isMe ? 'white' : 'dark'} p-2 rounded-3 ${data.message_type === 'emoji' ? 'emoji-only' : ''}">
+                    ${data.message ? data.message.replace(/\n/g, '<br>') : ""}
+                    ${attachmentsHTML}
+                </div>
+            </div>
+            ${isMe ? `<img src="${avatarUrl}" class="avatar rounded-circle ms-2">` : ""}
+        </div>
+    `;
+
+        div.innerHTML = msgHtml;
+        box.appendChild(div);
+
+        // đảm bảo cuộn xuống
+        requestAnimationFrame(() => {
+            box.scrollTop = box.scrollHeight;
+        });
+    });
+
+
+
+
+
+    // Xử lý tin nhắn group
+    socket.on("receive_group_message", (data) => {
+        const isMe = data.username === "{{ session['username'] }}";
+        const isCurrentGroup = currentType === "group" && parseInt(currentTarget) === parseInt(data.group_id);
+
+        // Nếu KHÔNG phải người gửi và KHÔNG đang mở đúng đoạn chat nhóm
+        if (!isMe && !isCurrentGroup) {
+            // Cập nhật badge số tin chưa đọc
+            const badge = document.getElementById("badge-group-" + data.group_id);
+            if (badge) {
+                let count = parseInt(badge.textContent) || 0;
+                badge.textContent = count + 1;
+                badge.classList.remove("d-none");
+            }
+
+            // ✅ PHÁT ÂM THANH (ngay cả khi cửa sổ đang được focus)
+            const audio = document.getElementById("message-audio");
+            if (audio) {
+                audio.play().catch(err => {
+                    console.warn("Không thể phát âm thanh:", err);
+                });
+            }
+
+            return;  // Không hiển thị vào khung chat
+        }
+
+        // Nếu đang mở đúng đoạn chat nhóm thì hiển thị như bình thường
+        const box = document.getElementById("chat-box");
+        const div = document.createElement("div");
+        div.classList.add("message", isMe ? "you" : "other");
+
+        const avatarUrl = "{{ url_for('static', filename='') }}" + (data.avatar_url || 'default-avatar.png');
+
+        let attachmentsHTML = "";
+        if (Array.isArray(data.attachments)) {
+            data.attachments.forEach(att => {
+                if (att.file_type === "image") {
+                    attachmentsHTML += `<img src="${att.file_url}" class="img-fluid rounded mt-2">`;
+                } else if (att.file_type === "video") {
+                    attachmentsHTML += `
+            <div class="video-content mt-2">
+                <video controls class="w-100 rounded">
+                    <source src="${att.file_url}" type="video/mp4">
+                    Trình duyệt không hỗ trợ phát video.
+                </video>
+            </div>`;
+                } else {
+                    attachmentsHTML += `
+            <a href="${att.file_url}" target="_blank" class="btn btn-sm btn-outline-secondary mt-2">
+                📎 ${att.filename}
+            </a>`;
+                }
+            });
+        }
+
+        const msgHtml = `
+<div class="d-flex ${isMe ? 'justify-content-end' : 'align-items-start'}">
+    ${!isMe ? `<img src="${avatarUrl}" class="avatar rounded-circle me-2">` : ""}
+    <div class="message-container text-${isMe ? 'end' : 'start'}">
+        <div class="message-header">
+            ${!isMe ? `<strong>${data.username}</strong>` : ""}
+            <small class="text-muted ms-2">${data.timestamp}</small>
+        </div>
+        <div class="message-content bg-${isMe ? 'primary' : 'light'} text-${isMe ? 'white' : 'dark'} p-2 rounded-3">
+            ${data.message ? data.message.replace(/\n/g, '<br>') : ""}
+            ${attachmentsHTML}
+        </div>
+    </div>
+    ${isMe ? `<img src="${avatarUrl}" class="avatar rounded-circle ms-2">` : ""}
+</div>`;
+
+        div.innerHTML = msgHtml;
+        box.appendChild(div);
+
+        requestAnimationFrame(() => {
+            box.scrollTop = box.scrollHeight;
+        });
+    });
+
+
+
+
+
+
+
+
+    socket.on("message_seen", (data) => {
+        const myId = parseInt("{{ session['user_id'] }}");
+        const toId = parseInt(data.to_id);
+        const fromId = parseInt(data.from_id);
+        const targetId = parseInt(currentTarget);
+
+        // Kiểm tra: Người nhận là mình, người gửi là đối phương đang trò chuyện
+        if (toId === myId && fromId === targetId) {
+            const messages = document.querySelectorAll(".message.you");
+            if (messages.length === 0) return;
+
+            const lastMsg = messages[messages.length - 1];
+
+            // Nếu chưa có thì tạo phần hiển thị "Đã xem"
+            if (!lastMsg.querySelector(".seen-status")) {
+                const seenTag = document.createElement("div");
+                seenTag.className = "seen-status text-end text-muted small mt-1";
+                seenTag.innerText = "Đã xem";
+                seenTag.style.display = "none"; // Ẩn mặc định
+
+                lastMsg.appendChild(seenTag);
+
+                // Cho phép người dùng click để bật/tắt trạng thái
+                lastMsg.addEventListener("click", () => {
+                    const current = seenTag.style.display;
+                    seenTag.style.display = current === "none" ? "block" : "none";
+                });
+            }
+        }
+    });
+
+
+
+
+    // Thông báo tin nhắn
+    document.querySelectorAll(".contact-item[data-type='user']").forEach(item => {
+        item.addEventListener("click", function () {
+            const userId = this.dataset.userId;
+
+            // Gửi sự kiện đến server để đánh dấu là đã đọc
+            socket.emit("mark_as_read", {
+                type: "user",
+                user_id: parseInt(userId)
+            });
+
+            // Ẩn badge sau khi đã đọc
+            const badge = document.getElementById("badge-" + userId);
+            if (badge) {
+                badge.classList.add("d-none");
+                badge.textContent = "0";
+            }
+        });
+    });
+
+
+
+
+
+
+    document.addEventListener('click', function (event) {
+        const toggleButton = document.querySelector('[data-bs-target="#friendRequestsCollapse"]');
+        const collapseElement = document.getElementById("friendRequestsCollapse");
+
+        // Kiểm tra click nằm ngoài toggle button và khung collapse
+        if (
+            collapseElement.classList.contains("show") &&
+            !collapseElement.contains(event.target) &&
+            !toggleButton.contains(event.target)
+        ) {
+            const bsCollapse = bootstrap.Collapse.getInstance(collapseElement);
+            if (bsCollapse) {
+                bsCollapse.hide();
+            }
+        }
+    });
+
+    function updateOnlineDot(userId, isOnline) {
+        const dot = document.querySelector(`[data-online-indicator="${userId}"]`);
+        if (dot) {
+            dot.classList.toggle("d-none", !isOnline);
+        }
+    }
+
+    socket.on("user_online", (data) => {
+        const el = document.querySelector(`[data-user-id="${data.user_id}"]`);
+        if (el) el.classList.add("online");
+        updateOnlineDot(data.user_id, true);
+    });
+
+    socket.on("user_offline", (data) => {
+        const el = document.querySelector(`[data-user-id="${data.user_id}"]`);
+        if (el) el.classList.remove("online");
+        updateOnlineDot(data.user_id, false);
+    });
+
+    const onlineIds = {{ online_ids | tojson }};
+    onlineIds.forEach(id => updateOnlineDot(id, true));
+
+
+
+    socket.on("show_typing", (data) => {
+        if (parseInt(data.from_id) === parseInt(currentTarget)) {
+            document.getElementById("typing-indicator").style.display = "block";
+        }
+    });
+
+    socket.on("hide_typing", (data) => {
+        if (parseInt(data.from_id) === parseInt(currentTarget)) {
+            document.getElementById("typing-indicator").style.display = "none";
+        }
+    });
+
+    socket.on("show_typing_group", (data) => {
+        if (parseInt(data.group_id) !== parseInt(currentTarget)) return;
+
+        const typingIndicator = document.getElementById("typing-indicator");
+        typingIndicator.innerText = `${data.username} đang gõ...`;
+        typingIndicator.style.display = "block";
+    });
+
+    socket.on("hide_typing_group", (data) => {
+        if (parseInt(data.group_id) !== parseInt(currentTarget)) return;
+
+        const typingIndicator = document.getElementById("typing-indicator");
+        typingIndicator.style.display = "none";
+    });
+
+
+</script>
+{% endblock %}
