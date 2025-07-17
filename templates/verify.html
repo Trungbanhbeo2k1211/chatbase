@@ -1,3 +1,145 @@
+<style>
+  /* Reset và font chữ */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: #333;
+}
+
+/* Container chính */
+body > form {
+  background-color: white;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Tiêu đề */
+h2 {
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+h2::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(to right, #3498db, #2ecc71);
+  border-radius: 3px;
+}
+
+/* Input fields */
+input {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+input[type="email"] {
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+input[type="text"] {
+  letter-spacing: 0.2em;
+  font-size: 18px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Nút xác nhận */
+button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(to right, #3498db, #2ecc71);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(to right, #2980b9, #27ae60);
+}
+
+/* Thông báo lỗi */
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+ul li {
+  background-color: #ffecec;
+  color: #e74c3c;
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  font-size: 14px;
+  border-left: 3px solid #e74c3c;
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Hiệu ứng */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  body > form {
+    padding: 1.5rem;
+    margin: 1rem;
+    box-shadow: none;
+    background-color: transparent;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+}
+</style>
 <!DOCTYPE html>
 <html>
 <head><title>Xác nhận tài khoản</title></head>
