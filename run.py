@@ -68,4 +68,4 @@ def home():
                            online_ids=list(online_users))
 
 if __name__ == "__main__":
-    socketio.run(app, port=5000, debug=True)
+    socketio.run(app, debug=True)
