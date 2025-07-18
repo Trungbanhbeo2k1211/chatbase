@@ -687,8 +687,14 @@ function startVideo(isReceiver) {
             peer = new SimplePeer({
                 initiator: !isReceiver,
                 trickle: false,
-                stream: stream
+                stream: stream,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' } // STUN miễn phí của Google
+                    ]
+                }
             });
+
 
             peer.on("signal", (data) => {
                 socket.emit("webrtc_signal", { to_id: currentTarget, signal: data });
